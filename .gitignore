@@ -1,0 +1,25 @@
+# Virtual Environment
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Database
+*.db
+
+# ChromaDB / Vector DB
+vectorstore/
+
+# Uploads
+uploads/
+
+# Environment
+.env
+
+# Model files
+*.pt
+*.pth
+*.onnx
+*.bin
