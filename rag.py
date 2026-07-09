@@ -502,14 +502,13 @@ import chromadb
 
 from sentence_transformers import SentenceTransformer
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from chatbot import bot
 
 from prompts import RAG_PROMPT
 
 from config import VECTOR_DB
-
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class RAG:
 
