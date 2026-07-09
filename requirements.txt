@@ -1,66 +1,39 @@
-streamlit>=1.45.0
-
-# AI / LLM
-ollama
-openai
-transformers
-sentence-transformers
-accelerate
-torch
-
-# RAG
-langchain
-langchain-community
-langchain-text-splitters
-chromadb
-faiss-cpu
-
-# PDF / Resume
-pypdf
-python-docx
-reportlab
-PyMuPDF
-
-# Images / OCR
-Pillow
-opencv-python
-pytesseract
-
-# Data
-numpy
-pandas
-
-# Environment
-python-dotenv
-
-# Web
-requests
-beautifulsoup4
-lxml
-
-# Utilities
-tqdm
-rich
 streamlit
-python-dotenv
-requests
-pandas
+
 numpy
-pypdf
-python-docx
-reportlab
-Pillow
-chromadb
+pandas
+requests
+python-dotenv
+
+torch
+transformers
+accelerate
 sentence-transformers
-faiss-cpu
+
 langchain
 langchain-community
 langchain-text-splitters
-ollama
-transformers
-torch
-accelerate
+
+chromadb
+faiss-cpu
+
 openai
+ollama
+
+PyMuPDF
+pypdf
+python-docx
+reportlab
+
+opencv-python
+Pillow
+pytesseract
+easyocr
+
 beautifulsoup4
 lxml
+
+rich
 tqdm
+
+Werkzeug
