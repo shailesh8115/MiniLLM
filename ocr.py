@@ -40,4 +40,5 @@ Question
         return bot.chat(prompt)
 
 
+# Create singleton object
 ocr = OCR()
