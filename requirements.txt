@@ -25,10 +25,13 @@ pypdf
 python-docx
 reportlab
 
-opencv-python
+# Images / OCR
 Pillow
+opencv-python-headless==4.10.0.84
+easyocr==1.7.2
 pytesseract
-easyocr
+numpy<2.0
+
 
 beautifulsoup4
 lxml
