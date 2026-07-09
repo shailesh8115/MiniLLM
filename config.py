@@ -9,22 +9,7 @@ load_dotenv()
 
 LLM_PROVIDER = os.getenv(
     "LLM_PROVIDER",
-    "ollama"
-).lower()
-
-# ======================================
-# Ollama
-# ======================================
-
-# Must match `ollama list`
-OLLAMA_MODEL = os.getenv(
-    "OLLAMA_MODEL",
-    "llama3.2:latest"
-)
-
-OLLAMA_HOST = os.getenv(
-    "OLLAMA_HOST",
-    "http://localhost:11434"
+    "openai"
 )
 
 # ======================================
@@ -41,6 +26,22 @@ OPENAI_MODEL = os.getenv(
     "gpt-4.1-mini"
 )
 
+
+# ======================================
+# Ollama (Local Only)
+# ======================================
+
+OLLAMA_MODEL = os.getenv(
+    "OLLAMA_MODEL",
+    "llama3.2:latest"
+)
+
+OLLAMA_HOST = os.getenv(
+    "OLLAMA_HOST",
+    "http://localhost:11434"
+)
+
+
 # ======================================
 # Database
 # ======================================
@@ -49,6 +50,7 @@ DATABASE_NAME = os.getenv(
     "DATABASE_NAME",
     "database/minillm.db"
 )
+
 
 # ======================================
 # Vector Database
@@ -59,6 +61,7 @@ VECTOR_DB = os.getenv(
     "vectorstore"
 )
 
+
 # ======================================
 # Uploads
 # ======================================
@@ -67,6 +70,7 @@ UPLOAD_FOLDER = os.getenv(
     "UPLOAD_FOLDER",
     "uploads"
 )
+
 
 # ======================================
 # Create folders

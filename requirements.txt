@@ -9,6 +9,7 @@ accelerate
 chromadb
 faiss-cpu
 langchain-text-splitters
+langchain-ollama
 
 easyocr
 opencv-python-headless
