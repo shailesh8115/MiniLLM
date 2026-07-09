@@ -1,36 +1,29 @@
 streamlit
-
-# AI
 openai
 ollama
-
-torch==2.13.0
+torch
 transformers
 sentence-transformers
 accelerate
 
-# RAG
 chromadb
 faiss-cpu
 langchain-text-splitters
 
-# PDF
+easyocr
+opencv-python-headless
+Pillow
+pytesseract
+
 PyMuPDF
 pypdf
 python-docx
 reportlab
 
-# OCR
-opencv-python-headless
-easyocr
-Pillow
-pytesseract
+ddgs
 
-# Data
 numpy
 pandas
-
-# Utils
 python-dotenv
 requests
 beautifulsoup4
@@ -40,4 +33,3 @@ rich
 
 Werkzeug
 Flask
-ddgs==9.6.1
