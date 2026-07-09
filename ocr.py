@@ -5,23 +5,32 @@ try:
 except ImportError:
     easyocr = None
 
-
 class OCR:
 
-    def __init__(self):
-        if easyocr is not None:
-            self.reader = easyocr.Reader(["en"], gpu=False)
-        else:
-            self.reader = None
+    ...
 
     def extract_text(self, image_path):
-        if self.reader is None:
-            return "EasyOCR is not available."
 
-        result = self.reader.readtext(image_path, detail=0)
+        result = self.reader.readtext(
+            image_path,
+            detail=0
+        )
+
         return "\n".join(result)
 
-    def ask(self, image_path, question=""):
+    # Alias
+    def extract(self, image_path):
+        return self.extract_text(image_path)
+    # -----------------------
+    # Ask AI
+    # -----------------------
+
+    def ask(
+        self,
+        image_path,
+        question=""
+    ):
+
         text = self.extract_text(image_path)
 
         if not question:
@@ -40,5 +49,4 @@ Question
         return bot.chat(prompt)
 
 
-# Create singleton object
 ocr = OCR()

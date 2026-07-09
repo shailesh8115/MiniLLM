@@ -1007,7 +1007,6 @@ elif st.session_state.page == "JD Match":
 # ==========================================================
 # OCR
 # ==========================================================
-
 elif st.session_state.page == "OCR":
 
     st.title("🖼 AI OCR")
@@ -1038,7 +1037,6 @@ elif st.session_state.page == "OCR":
         ) as tmp:
 
             tmp.write(image.read())
-
             path = tmp.name
 
         if st.button(
@@ -1048,9 +1046,9 @@ elif st.session_state.page == "OCR":
 
             with st.spinner("Reading Image..."):
 
-                text = ocr.extract(path)
+                text = ocr.extract_text(path)
 
-            st.subheader("Extracted Text")
+            st.subheader("📄 Extracted Text")
 
             st.text_area(
                 "",
@@ -1058,22 +1056,20 @@ elif st.session_state.page == "OCR":
                 height=250
             )
 
-        if question:
+        if st.button(
+            "Ask AI",
+            use_container_width=True,
+            disabled=not question.strip()
+        ):
 
-            if st.button(
-                "Ask AI",
-                use_container_width=True
-            ):
+            with st.spinner("🤖 Thinking..."):
 
-                with st.spinner("Thinking..."):
+                answer = ocr.ask(
+                    path,
+                    question
+                )
 
-                    answer = ocr.ask(
-                        path,
-                        question
-                    )
-
-                st.success(answer)
-
+            st.success(answer)
 # ==========================================================
 # WEB SEARCH
 # ==========================================================
