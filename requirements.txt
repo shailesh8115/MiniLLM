@@ -40,3 +40,4 @@ rich
 
 Werkzeug
 Flask
+ddgs==9.6.1
