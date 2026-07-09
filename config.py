@@ -1,68 +1,54 @@
 import os
+import streamlit as st
 from dotenv import load_dotenv
-from openai import OpenAI
+
 load_dotenv()
 
-# ======================================
-# LLM Provider
-# ======================================
+
+def get_secret(name, default=None):
+    try:
+        if name in st.secrets:
+            return st.secrets[name]
+    except Exception:
+        pass
+
+    return os.getenv(name, default)
 
 
-# ======================================
-# OpenAI
-# ======================================
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+# ==============================
+# LLM
+# ==============================
 
-# ======================================
-# Ollama (Local Only)
-# ======================================
+LLM_PROVIDER = get_secret("LLM_PROVIDER", "openai")
 
-OLLAMA_MODEL = os.getenv(
+OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
+
+OPENAI_MODEL = get_secret(
+    "OPENAI_MODEL",
+    "gpt-4.1-mini"
+)
+
+# Optional (for local development only)
+
+OLLAMA_MODEL = get_secret(
     "OLLAMA_MODEL",
     "llama3.2:latest"
 )
 
-OLLAMA_HOST = os.getenv(
+OLLAMA_HOST = get_secret(
     "OLLAMA_HOST",
     "http://localhost:11434"
 )
 
-
-# ======================================
+# ==============================
 # Database
-# ======================================
+# ==============================
 
-DATABASE_NAME = os.getenv(
-    "DATABASE_NAME",
-    "database/minillm.db"
-)
+DATABASE_NAME = "database/minillm.db"
 
+VECTOR_DB = "vectorstore"
 
-# ======================================
-# Vector Database
-# ======================================
-
-VECTOR_DB = os.getenv(
-    "VECTOR_DB",
-    "vectorstore"
-)
-
-
-# ======================================
-# Uploads
-# ======================================
-
-UPLOAD_FOLDER = os.getenv(
-    "UPLOAD_FOLDER",
-    "uploads"
-)
-
-
-# ======================================
-# Create folders
-# ======================================
+UPLOAD_FOLDER = "uploads"
 
 for folder in [
     "database",

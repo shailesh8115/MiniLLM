@@ -1,36 +1,57 @@
-streamlit
-openai
-ollama
-torch
-transformers
-sentence-transformers
-accelerate
+streamlit>=1.46.0
+
+openai>=1.99.0
+
+python-dotenv
 
 chromadb
-faiss-cpu
-langchain-text-splitters
-langchain-ollama
 
-easyocr
-opencv-python-headless
-Pillow
-pytesseract
+sentence-transformers
+
+torch
+
+transformers
+
+accelerate
+
+faiss-cpu
+
+langchain
+
+langchain-text-splitters
 
 PyMuPDF
+
 pypdf
+
+easyocr
+
+opencv-python-headless
+
+Pillow
+
+pytesseract
+
 python-docx
+
 reportlab
 
 ddgs
 
 numpy
+
 pandas
-python-dotenv
+
 requests
+
 beautifulsoup4
+
 lxml
+
 tqdm
+
 rich
 
 Werkzeug
+
 Flask
