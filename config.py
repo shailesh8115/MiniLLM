@@ -2,10 +2,17 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
+# Load .env for local development
 load_dotenv()
 
 
 def get_secret(name, default=None):
+    """
+    Read configuration in this order:
+    1. Streamlit Cloud Secrets
+    2. Environment Variables
+    3. Default value
+    """
     try:
         if name in st.secrets:
             return st.secrets[name]
@@ -15,11 +22,14 @@ def get_secret(name, default=None):
     return os.getenv(name, default)
 
 
-# ==============================
-# LLM
-# ==============================
+# =====================================
+# LLM Configuration
+# =====================================
 
-LLM_PROVIDER = get_secret("LLM_PROVIDER", "openai")
+LLM_PROVIDER = get_secret(
+    "LLM_PROVIDER",
+    "openai"
+)
 
 OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
 
@@ -28,8 +38,7 @@ OPENAI_MODEL = get_secret(
     "gpt-4.1-mini"
 )
 
-# Optional (for local development only)
-
+# Optional (used only for local Ollama)
 OLLAMA_MODEL = get_secret(
     "OLLAMA_MODEL",
     "llama3.2:latest"
@@ -40,15 +49,36 @@ OLLAMA_HOST = get_secret(
     "http://localhost:11434"
 )
 
-# ==============================
+# =====================================
 # Database
-# ==============================
+# =====================================
 
-DATABASE_NAME = "database/minillm.db"
+DATABASE_NAME = get_secret(
+    "DATABASE_NAME",
+    "database/minillm.db"
+)
 
-VECTOR_DB = "vectorstore"
+# =====================================
+# Vector Database
+# =====================================
 
-UPLOAD_FOLDER = "uploads"
+VECTOR_DB = get_secret(
+    "VECTOR_DB",
+    "vectorstore"
+)
+
+# =====================================
+# Upload Folder
+# =====================================
+
+UPLOAD_FOLDER = get_secret(
+    "UPLOAD_FOLDER",
+    "uploads"
+)
+
+# =====================================
+# Create folders
+# =====================================
 
 for folder in [
     "database",

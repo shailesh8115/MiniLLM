@@ -1,7 +1,6 @@
 from openai import OpenAI
 
 from config import (
-    LLM_PROVIDER,
     OPENAI_API_KEY,
     OPENAI_MODEL,
 )
@@ -13,14 +12,10 @@ class ChatBot:
 
     def __init__(self):
 
-        if LLM_PROVIDER.lower() != "openai":
-            raise ValueError(
-                "Only OpenAI is supported for Streamlit Cloud."
-            )
-
         if not OPENAI_API_KEY:
             raise ValueError(
-                "OPENAI_API_KEY is missing. Add it to Streamlit Secrets."
+                "OPENAI_API_KEY is missing.\n"
+                "Add it to Streamlit Secrets or your .env file."
             )
 
         self.client = OpenAI(
@@ -29,29 +24,37 @@ class ChatBot:
 
     def chat(
         self,
-        prompt,
-        system_prompt=SYSTEM_PROMPT,
-    ):
+        prompt: str,
+        system_prompt: str = SYSTEM_PROMPT,
+    ) -> str:
 
-        response = self.client.chat.completions.create(
+        try:
 
-            model=OPENAI_MODEL,
+            response = self.client.chat.completions.create(
 
-            messages=[
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
+                model=OPENAI_MODEL,
 
-            temperature=0.2,
-        )
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
 
-        return response.choices[0].message.content
+                temperature=0.2,
+                max_tokens=1024,
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+
+            return f"❌ OpenAI Error:\n{str(e)}"
 
 
+# Singleton
 bot = ChatBot()
