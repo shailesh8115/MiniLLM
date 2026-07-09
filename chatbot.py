@@ -1,16 +1,15 @@
 import ollama
 from openai import OpenAI
+from openai import OpenAI
+from config import OPENAI_API_KEY
 
 from config import (
     LLM_PROVIDER,
-    OLLAMA_MODEL,
-    OPENAI_MODEL,
     OPENAI_API_KEY,
+    OPENAI_MODEL,
+    OLLAMA_MODEL,
 )
-
 from prompts import SYSTEM_PROMPT
-
-
 class ChatBot:
 
     def __init__(self):

@@ -1,31 +1,19 @@
 import os
 from dotenv import load_dotenv
-
+from openai import OpenAI
 load_dotenv()
 
 # ======================================
 # LLM Provider
 # ======================================
 
-LLM_PROVIDER = os.getenv(
-    "LLM_PROVIDER",
-    "openai"
-)
 
 # ======================================
 # OpenAI
 # ======================================
-
-OPENAI_API_KEY = os.getenv(
-    "OPENAI_API_KEY",
-    ""
-)
-
-OPENAI_MODEL = os.getenv(
-    "OPENAI_MODEL",
-    "gpt-4.1-mini"
-)
-
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 
 # ======================================
 # Ollama (Local Only)
