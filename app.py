@@ -350,11 +350,10 @@
 #         st.info("No resumes saved yet.")
 import streamlit as st
 import tempfile
-import streamlit as st
-import tempfile
 from rag import rag
 from resume import analyze_resume
-import tempfile
+from flask import Flask
+app = Flask(__name__)
 # ==========================================
 # IMPORT MODULES
 # ==========================================
