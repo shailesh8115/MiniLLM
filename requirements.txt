@@ -28,5 +28,3 @@ rich
 Werkzeug
 Flask
 ddgs
-adless
-torchvision
