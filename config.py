@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 # Load .env for local development
 load_dotenv()
 
+import os
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 def get_secret(name, default=None):
     """
     Read configuration in this order:
