@@ -1,62 +1,29 @@
-from openai import OpenAI
+import os
+from google import genai
 
-from config import (
-    OPENAI_API_KEY,
-    OPENAI_MODEL,
-)
-
+from config import GEMINI_API_KEY, GEMINI_MODEL
 from prompts import SYSTEM_PROMPT
-from openai import OpenAI
 
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 class ChatBot:
 
     def __init__(self):
+        self.client = genai.Client(api_key=GEMINI_API_KEY)
 
-        if not OPENAI_API_KEY:
-            raise ValueError(
-                "OPENAI_API_KEY is missing.\n"
-                "Add it to Streamlit Secrets or your .env file."
-            )
+    def chat(self, prompt, system_prompt=SYSTEM_PROMPT):
 
-        self.client = OpenAI(
-            api_key=OPENAI_API_KEY
+        full_prompt = f"""
+{system_prompt}
+
+{prompt}
+"""
+
+        response = self.client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=full_prompt,
         )
 
-    def chat(
-        self,
-        prompt: str,
-        system_prompt: str = SYSTEM_PROMPT,
-    ) -> str:
-
-        try:
-
-            response = self.client.chat.completions.create(
-
-                model=OPENAI_MODEL,
-
-                messages=[
-                    {
-                        "role": "system",
-                        "content": system_prompt,
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    },
-                ],
-
-                temperature=0.2,
-                max_tokens=1024,
-            )
-
-            return response.choices[0].message.content
-
-        except Exception as e:
-
-            return f"❌ OpenAI Error:\n{str(e)}"
+        return response.text
 
 
-# Singleton
 bot = ChatBot()

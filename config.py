@@ -7,7 +7,11 @@ load_dotenv()
 
 import os
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+LLM_PROVIDER = "gemini"
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+GEMINI_MODEL = "gemini-2.5-flash"
 def get_secret(name, default=None):
     """
     Read configuration in this order:
@@ -28,16 +32,10 @@ def get_secret(name, default=None):
 # LLM Configuration
 # =====================================
 
-LLM_PROVIDER = get_secret(
-    "LLM_PROVIDER",
-    "openai"
-)
 
-OPENAI_API_KEY = get_secret("OPENAI_API_KEY")
-
-OPENAI_MODEL = get_secret(
-    "OPENAI_MODEL",
-    "gpt-4.1-mini"
+GEMINI_MODEL = get_secret(
+    "GEMINI_MODEL",
+    "gemini-2.5-flash"
 )
 
 # Optional (used only for local Ollama)
