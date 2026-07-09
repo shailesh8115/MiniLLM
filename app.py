@@ -801,6 +801,7 @@ elif st.session_state.page == "Resume Builder":
 elif st.session_state.page == "ATS Checker":
 
     import re
+    import tempfile
 
     st.title("📊 ATS Resume Checker")
 
@@ -809,9 +810,8 @@ elif st.session_state.page == "ATS Checker":
         type=["pdf"]
     )
 
-    if resume is not None:
+    if resume:
 
-        # Save uploaded PDF
         with tempfile.NamedTemporaryFile(
             delete=False,
             suffix=".pdf"
@@ -820,74 +820,84 @@ elif st.session_state.page == "ATS Checker":
             tmp.write(resume.read())
             pdf_path = tmp.name
 
-        # Read PDF text
         with st.spinner("📖 Reading Resume..."):
-
             resume_text = rag.read_pdf(pdf_path)
 
-        # Analyze Resume
         with st.spinner("🤖 Analyzing Resume..."):
-
             result = analyze_resume(resume_text)
 
-        # -------------------------
-        # Convert result to string
-        # -------------------------
+        # -----------------------
+        # Convert to string
+        # -----------------------
+
+        if isinstance(result, dict):
+            report = "\n".join(
+                f"{k}: {v}" for k, v in result.items()
+            )
+
+        elif isinstance(result, (list, tuple)):
+            report = "\n".join(map(str, result))
+
+        else:
+            report = str(result)
+
+        # -----------------------
+        # Extract ATS Score
+        # -----------------------
 
         score = 0
 
-        if isinstance(result, str):
+        patterns = [
+            r"ATS\s*Score\s*[:\-]?\s*(\d{1,3})",
+            r"Score\s*[:\-]?\s*(\d{1,3})",
+            r"(\d{1,3})\s*/\s*100"
+        ]
 
-            report = result
+        for pattern in patterns:
 
-        elif isinstance(result, (list, tuple)):
-
-            report = "\n".join(map(str, result))
-
-        elif isinstance(result, dict):
-
-            report = "\n".join(
-                f"**{k}** : {v}"
-                for k, v in result.items()
+            match = re.search(
+                pattern,
+                report,
+                re.IGNORECASE
             )
 
-        else:
+            if match:
 
-            report = str(result)
+                score = min(
+                    int(match.group(1)),
+                    100
+                )
 
-        # -------------------------
-        # Extract ATS Score
-        # -------------------------
+                break
 
-        match = re.search(
-            r'(\d{1,3})',
-            report
+        # -----------------------
+        # Remove ATS Score line
+        # -----------------------
+
+        report = re.sub(
+            r"ATS\s*Score\s*[:\-]?\s*\d{1,3}\s*/?\s*100?",
+            "",
+            report,
+            flags=re.IGNORECASE
         )
 
-        if match:
+        report = report.strip()
 
-            score = min(
-                int(match.group(1)),
-                100
-            )
-
-        # -------------------------
+        # -----------------------
         # UI
-        # -------------------------
+        # -----------------------
 
         st.success("✅ Analysis Completed")
 
         col1, col2 = st.columns([1, 3])
 
         with col1:
-
             st.metric(
                 "ATS Score",
                 f"{score}%"
             )
 
         with col2:
-
             st.progress(score / 100)
 
         st.divider()
@@ -895,7 +905,6 @@ elif st.session_state.page == "ATS Checker":
         st.subheader("📄 ATS Report")
 
         st.markdown(report)
-
 # ==========================================================
 # SKILL GROWTH
 # ==========================================================
