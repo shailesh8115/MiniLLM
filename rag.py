@@ -537,29 +537,41 @@ class RAG:
     # Read PDF
     # =====================================
 
-    def read_pdf(self, pdf):
 
-        if isinstance(pdf, str):
 
-            document = fitz.open(pdf)
 
-        else:
+def read_pdf(self, pdf):
 
-            document = fitz.open(
-                stream=pdf.read(),
-                filetype="pdf"
-            )
+    if isinstance(pdf, str):
 
-        text = ""
+        if not os.path.exists(pdf):
+            raise FileNotFoundError(f"PDF not found: {pdf}")
 
-        for page in document:
+        if os.path.getsize(pdf) == 0:
+            raise ValueError(f"PDF is empty: {pdf}")
 
-            text += page.get_text()
+        document = fitz.open(pdf)
 
-        document.close()
+    else:
 
-        return text
+        data = pdf.getvalue()
 
+        if len(data) == 0:
+            raise ValueError("Uploaded PDF is empty.")
+
+        document = fitz.open(
+            stream=data,
+            filetype="pdf"
+        )
+
+    text = ""
+
+    for page in document:
+        text += page.get_text()
+
+    document.close()
+
+    return text
     # =====================================
     # Chunk Text
     # =====================================
@@ -572,31 +584,30 @@ class RAG:
     # Add PDF to Vector DB
     # =====================================
 
-    def add_document(self, pdf_path):
+def add_document(self, pdf):
 
-        text = self.read_pdf(pdf_path)
+    text = self.read_pdf(pdf)
 
-        chunks = self.chunk_text(text)
+    if not text.strip():
+        raise ValueError("No text found in the PDF.")
 
-        for chunk in chunks:
+    chunks = self.chunk_text(text)
 
-            embedding = self.embedding_model.encode(
-                chunk
-            ).tolist()
+    for chunk in chunks:
 
-            self.collection.add(
+        embedding = self.embedding_model.encode(
+            chunk
+        ).tolist()
 
-                ids=[str(uuid.uuid4())],
+        self.collection.add(
+            ids=[str(uuid.uuid4())],
+            documents=[chunk],
+            embeddings=[embedding]
+        )
 
-                documents=[chunk],
+    self.documents.append(str(pdf))
 
-                embeddings=[embedding]
-
-            )
-
-        self.documents.append(pdf_path)
-
-        return True
+    return True
         # =====================================
     # Retrieve Relevant Chunks
     # =====================================

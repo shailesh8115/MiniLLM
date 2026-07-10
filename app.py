@@ -487,7 +487,35 @@ with st.sidebar:
     # ======================================
     # PDF Upload (RAG)
     # ======================================
-uploaded_files = st.file_uploader(
+
+    # uploaded_files = st.file_uploader(
+    #     "📄 Upload PDF Documents",
+    #     type=["pdf"],
+    #     accept_multiple_files=True,
+    #     key="sidebar_pdf_upload"
+    # )
+
+    # if uploaded_files:
+
+    #     with st.spinner("📚 Indexing Documents..."):
+
+    #         for pdf in uploaded_files:
+
+    #             with tempfile.NamedTemporaryFile(
+    #                 delete=False,
+    #                 suffix=".pdf"
+    #             ) as tmp:
+
+    #                 tmp.write(pdf.read())
+
+    #                 rag.add_document(tmp.name)
+
+    #     st.session_state.documents_loaded = True
+
+    #     st.success("✅ Documents Indexed Successfully")
+
+    # st.divider()
+    uploaded_files = st.file_uploader(
     "📄 Upload PDF Documents",
     type=["pdf"],
     accept_multiple_files=True,
@@ -499,22 +527,16 @@ if uploaded_files:
     with st.spinner("📚 Indexing Documents..."):
 
         for pdf in uploaded_files:
-
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".pdf"
-            ) as tmp:
-
-                tmp.write(pdf.getvalue())
-                tmp.flush()
-
-                temp_path = tmp.name
-
-            rag.add_document(temp_path)
+            
+            rag.add_document(pdf)
+            # File is now closed before opening with PyMuPDF
+         
 
     st.session_state.documents_loaded = True
+
     st.success("✅ Documents Indexed Successfully")
 
+    st.divider()
     # ======================================
     # NAVIGATION
     # ======================================
