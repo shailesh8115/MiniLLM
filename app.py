@@ -527,10 +527,19 @@ if uploaded_files:
     with st.spinner("📚 Indexing Documents..."):
 
         for pdf in uploaded_files:
-            
-            rag.add_document(pdf)
+
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf"
+            ) as tmp:
+
+                tmp.write(pdf.getvalue())
+                tmp.flush()
+
+                temp_path = tmp.name
+
             # File is now closed before opening with PyMuPDF
-         
+            rag.add_document(temp_path)
 
     st.session_state.documents_loaded = True
 
