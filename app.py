@@ -352,7 +352,6 @@ import streamlit as st
 import tempfile
 from rag import rag
 from resume import analyze_resume
-
 # ==========================================
 # IMPORT MODULES
 # ==========================================
@@ -489,37 +488,34 @@ with st.sidebar:
     # PDF Upload (RAG)
     # ======================================
 
-   
+    uploaded_files = st.file_uploader(
+        "📄 Upload PDF Documents",
+        type=["pdf"],
+        accept_multiple_files=True,
+        key="sidebar_pdf_upload"
+    )
 
-uploaded_files = st.file_uploader(
-    "📄 Upload PDF Documents",
-    type=["pdf"],
-    accept_multiple_files=True,
-    key="sidebar_pdf_upload",
-)
+    if uploaded_files:
 
-if uploaded_files:
+        with st.spinner("📚 Indexing Documents..."):
 
-    with st.spinner("📚 Indexing Documents..."):
+            for pdf in uploaded_files:
 
-        for pdf in uploaded_files:
+                with tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=".pdf"
+                ) as tmp:
 
-            with tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".pdf",
-            ) as tmp:
+                    tmp.write(pdf.read())
 
-                tmp.write(pdf.getvalue())
-                tmp.flush()
+                    rag.add_document(tmp.name)
 
-                temp_path = tmp.name
+        st.session_state.documents_loaded = True
 
-            # File is now closed
-            rag.add_document(temp_path)
+        st.success("✅ Documents Indexed Successfully")
 
-    st.session_state.documents_loaded = True
+    st.divider()
 
-    st.success("✅ Documents Indexed Successfully")
     # ======================================
     # NAVIGATION
     # ======================================
