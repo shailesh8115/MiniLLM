@@ -649,29 +649,34 @@ elif st.session_state.page == "AI Chat":
     # Upload Resume
     # -----------------------------
     uploaded_resume = st.file_uploader(
-        "📄 Upload Resume (PDF)",
-        type=["pdf"],
-        key="resume_chat"
-    )
+    "📄 Upload Resume (PDF)",
+    type=["pdf"],
+    key="resume_chat"
+)
 
-    if uploaded_resume is not None:
+if uploaded_resume is not None:
 
-        if (
-            "resume_loaded" not in st.session_state
-            or st.session_state.get("resume_name") != uploaded_resume.name
-        ):
+    if (
+        "resume_loaded" not in st.session_state
+        or st.session_state.get("resume_name") != uploaded_resume.name
+    ):
 
-            with st.spinner("Reading Resume..."):
+        with st.spinner("Reading Resume..."):
 
-             rag.add_document(uploaded_resume)
+            try:
 
-    st.session_state.resume_loaded = True
-    st.session_state.resume_name = uploaded_resume.name
+                rag.add_document(uploaded_resume)
 
-    st.success("✅ Resume uploaded successfully!")
+                st.session_state.resume_loaded = True
+                st.session_state.resume_name = uploaded_resume.name
 
-    st.divider()
+                st.success("✅ Resume uploaded successfully!")
 
+            except Exception as e:
+
+                st.error(f"❌ {e}")
+
+    st.divider() 
     # -----------------------------
     # Load Previous Chat
     # -----------------------------
