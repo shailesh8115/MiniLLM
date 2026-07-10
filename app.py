@@ -487,34 +487,33 @@ with st.sidebar:
     # ======================================
     # PDF Upload (RAG)
     # ======================================
+uploaded_files = st.file_uploader(
+    "📄 Upload PDF Documents",
+    type=["pdf"],
+    accept_multiple_files=True,
+    key="sidebar_pdf_upload"
+)
 
-    uploaded_files = st.file_uploader(
-        "📄 Upload PDF Documents",
-        type=["pdf"],
-        accept_multiple_files=True,
-        key="sidebar_pdf_upload"
-    )
+if uploaded_files:
 
-    if uploaded_files:
+    with st.spinner("📚 Indexing Documents..."):
 
-        with st.spinner("📚 Indexing Documents..."):
+        for pdf in uploaded_files:
 
-            for pdf in uploaded_files:
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf"
+            ) as tmp:
 
-                with tempfile.NamedTemporaryFile(
-                    delete=False,
-                    suffix=".pdf"
-                ) as tmp:
+                tmp.write(pdf.getvalue())
+                tmp.flush()
 
-                    tmp.write(pdf.read())
+                temp_path = tmp.name
 
-                    rag.add_document(tmp.name)
+            rag.add_document(temp_path)
 
-        st.session_state.documents_loaded = True
-
-        st.success("✅ Documents Indexed Successfully")
-
-    st.divider()
+    st.session_state.documents_loaded = True
+    st.success("✅ Documents Indexed Successfully")
 
     # ======================================
     # NAVIGATION
