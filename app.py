@@ -641,7 +641,6 @@ if st.session_state.page == "Dashboard":
 # ==========================================================
 # AI CHAT
 # ==========================================================
-
 elif st.session_state.page == "AI Chat":
 
     st.title("💬 Resume AI Chat")
@@ -650,28 +649,33 @@ elif st.session_state.page == "AI Chat":
     # -----------------------------
     # Upload Resume
     # -----------------------------
- # Resume Upload
-uploaded_resume = st.file_uploader(
-    "Upload Resume PDF",
-    type=["pdf"],
-    key="resume_upload"
-)
-
-if uploaded_resume is not None:
-
-    st.success(f"Uploaded: {uploaded_resume.name}")
-
-    # Save uploaded file
-    resume_path = os.path.join(
-        "uploads",
-        uploaded_resume.name
+    uploaded_resume = st.file_uploader(
+        "Upload Resume PDF",
+        type=["pdf"],
+        key="resume_upload"
     )
 
-    with open(resume_path, "wb") as f:
-        f.write(uploaded_resume.getbuffer())
+    if uploaded_resume is not None:
 
-    st.session_state.resume_path = resume_path
-    st.session_state.resume_name = uploaded_resume.name
+        st.success(f"Uploaded: {uploaded_resume.name}")
+
+        # Create uploads folder
+        os.makedirs("uploads", exist_ok=True)
+
+        # Save uploaded file
+        resume_path = os.path.join(
+            "uploads",
+            uploaded_resume.name
+        )
+
+        with open(resume_path, "wb") as f:
+            f.write(uploaded_resume.getbuffer())
+
+        st.session_state.resume_path = resume_path
+        st.session_state.resume_name = uploaded_resume.name
+        st.session_state.resume_loaded = True
+
+
     # -----------------------------
     # Load Previous Chat
     # -----------------------------
@@ -695,6 +699,71 @@ if uploaded_resume is not None:
                 }
             )
 
+
+    # -----------------------------
+    # Display Chat
+    # -----------------------------
+    for msg in st.session_state.messages:
+
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+
+    # -----------------------------
+    # Chat Input
+    # -----------------------------
+    prompt = st.chat_input(
+        "Ask about your resume..."
+    )
+
+
+    if prompt:
+
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": prompt
+            }
+        )
+
+
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+
+        with st.chat_message("assistant"):
+
+            with st.spinner("Thinking..."):
+
+                if st.session_state.get(
+                    "resume_loaded",
+                    False
+                ):
+
+                    answer = rag.ask(prompt)
+
+                else:
+
+                    answer = (
+                        "⚠️ Please upload your resume first."
+                    )
+
+                st.markdown(answer)
+
+
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": answer
+            }
+        )
+
+
+        memory.save(
+            st.session_state.user,
+            prompt,
+            answer
+        )
     # -----------------------------
     # Display Chat
     # -----------------------------
