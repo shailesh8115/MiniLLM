@@ -643,81 +643,138 @@ if st.session_state.page == "Dashboard":
 
 elif st.session_state.page == "AI Chat":
 
-    st.title("💬 AI Chat")
+    st.title("💬 Resume AI Chat")
+    st.caption("Upload your resume and chat with AI.")
 
-    st.caption(
-        "Chat with your uploaded PDF documents using RAG."
+    # -----------------------------
+    # Upload Resume
+    # -----------------------------
+    # ==========================================
+# Resume Upload
+# ==========================================
+
+uploaded_resume = st.file_uploader(
+    "📄 Upload Resume (PDF)",
+    type=["pdf"],
+    key="resume_chat"
+)
+
+if uploaded_resume is not None:
+
+    current_file = (
+        uploaded_resume.name
+        + "_"
+        + str(uploaded_resume.size)
     )
 
-    # Load old chats
+    if st.session_state.get("resume_file") != current_file:
 
-    if len(st.session_state.messages) == 0:
+        try:
 
-        history = load_chat(st.session_state.user)
+            with st.spinner("📚 Reading Resume..."):
 
-        for q, a in history:
+                rag.clear()
 
-            st.session_state.messages.append(
-                {
-                    "role": "user",
-                    "content": q
-                }
-            )
+                rag.add_document(uploaded_resume)
 
-            st.session_state.messages.append(
-                {
-                    "role": "assistant",
-                    "content": a
-                }
-            )
+                st.session_state.resume_loaded = True
+                st.session_state.resume_file = current_file
 
-    # Display Chat
+            st.success("✅ Resume uploaded successfully!")
 
-    for msg in st.session_state.messages:
+        except Exception as e:
 
-        with st.chat_message(msg["role"]):
+            st.session_state.resume_loaded = False
 
-            st.markdown(msg["content"])
+            st.error(f"❌ Failed to upload resume.\n\n{e}")
 
-    # Chat Input
+st.divider()
 
-    prompt = st.chat_input(
-        "Ask anything..."
-    )
+# ==========================================
+# Load Previous Chat
+# ==========================================
 
-    if prompt:
+if len(st.session_state.messages) == 0:
+
+    history = load_chat(st.session_state.user)
+
+    for q, a in history:
 
         st.session_state.messages.append(
             {
                 "role": "user",
-                "content": prompt
+                "content": q
             }
         )
-
-        with st.chat_message("user"):
-
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-
-            with st.spinner("Thinking..."):
-
-                answer = rag.ask(prompt)
-
-                st.markdown(answer)
 
         st.session_state.messages.append(
             {
                 "role": "assistant",
-                "content": answer
+                "content": a
             }
         )
 
-        memory.save(
-            st.session_state.user,
-            prompt,
-            answer
-        )
+# ==========================================
+# Display Chat
+# ==========================================
+
+for msg in st.session_state.messages:
+
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# ==========================================
+# Chat Input
+# ==========================================
+
+prompt = st.chat_input("Ask about your resume...")
+
+if prompt:
+
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": prompt
+        }
+    )
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+
+        with st.spinner("🤖 Thinking..."):
+
+            try:
+
+                if st.session_state.get("resume_loaded", False):
+
+                    answer = rag.ask(prompt)
+
+                else:
+
+                    answer = (
+                        "⚠️ Please upload your resume first."
+                    )
+
+            except Exception as e:
+
+                answer = f"❌ Error: {e}"
+
+            st.markdown(answer)
+
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "content": answer
+        }
+    )
+
+    memory.save(
+        st.session_state.user,
+        prompt,
+        answer
+    )
 
 # ==========================================================
 # RESUME BUILDER

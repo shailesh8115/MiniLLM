@@ -537,66 +537,52 @@ class RAG:
     # Read PDF
     # =====================================
 
-    def read_pdf(self, pdf):
+def read_pdf(self, pdf):
 
-        if isinstance(pdf, str):
+    data = pdf.getvalue()
 
-            document = fitz.open(pdf)
+    if not data:
+        raise ValueError("Uploaded PDF is empty.")
 
-        else:
+    document = fitz.open(
+        stream=data,
+        filetype="pdf"
+    )
 
-            document = fitz.open(
-                stream=pdf.read(),
-                filetype="pdf"
-            )
+    text = ""
 
-        text = ""
+    for page in document:
+        text += page.get_text()
 
-        for page in document:
+    document.close()
 
-            text += page.get_text()
-
-        document.close()
-
-        return text
-
+    return text
     # =====================================
     # Chunk Text
     # =====================================
-
-    def chunk_text(self, text):
-
-        return self.splitter.split_text(text)
-
     # =====================================
     # Add PDF to Vector DB
     # =====================================
 
-    def add_document(self, pdf_path):
+def add_document(self, uploaded_file):
 
-        text = self.read_pdf(pdf_path)
+    text = self.read_pdf(uploaded_file)
 
-        chunks = self.chunk_text(text)
+    chunks = self.chunk_text(text)
 
-        for chunk in chunks:
+    for chunk in chunks:
 
-            embedding = self.embedding_model.encode(
-                chunk
-            ).tolist()
+        embedding = self.embedding_model.encode(chunk).tolist()
 
-            self.collection.add(
+        self.collection.add(
+            ids=[str(uuid.uuid4())],
+            documents=[chunk],
+            embeddings=[embedding],
+        )
 
-                ids=[str(uuid.uuid4())],
+    self.documents.append(uploaded_file.name)
 
-                documents=[chunk],
-
-                embeddings=[embedding]
-
-            )
-
-        self.documents.append(pdf_path)
-
-        return True
+    return True
         # =====================================
     # Retrieve Relevant Chunks
     # =====================================
