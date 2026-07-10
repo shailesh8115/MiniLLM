@@ -663,14 +663,12 @@ elif st.session_state.page == "AI Chat":
 
             with st.spinner("Reading Resume..."):
 
-                rag.clear()
+             rag.add_document(uploaded_resume)
 
-                rag.add_document(uploaded_resume)
+    st.session_state.resume_loaded = True
+    st.session_state.resume_name = uploaded_resume.name
 
-                st.session_state.resume_loaded = True
-                st.session_state.resume_name = uploaded_resume.name
-
-            st.success("✅ Resume uploaded successfully!")
+    st.success("✅ Resume uploaded successfully!")
 
     st.divider()
 
