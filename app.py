@@ -764,58 +764,6 @@ elif st.session_state.page == "AI Chat":
             prompt,
             answer
         )
-    # -----------------------------
-    # Display Chat
-    # -----------------------------
-    for msg in st.session_state.messages:
-
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-
-    # -----------------------------
-    # Chat Input
-    # -----------------------------
-    prompt = st.chat_input("Ask about your resume...")
-
-    if prompt:
-
-        st.session_state.messages.append(
-            {
-                "role": "user",
-                "content": prompt
-            }
-        )
-
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-
-            with st.spinner("Thinking..."):
-
-                if st.session_state.get("resume_loaded", False):
-
-                    answer = rag.ask(prompt)
-
-                else:
-
-                    answer = "⚠️ Please upload your resume first."
-
-                st.markdown(answer)
-
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": answer
-            }
-        )
-
-        memory.save(
-            st.session_state.user,
-            prompt,
-            answer
-        )
-
 # ==========================================================
 # RESUME BUILDER
 # ==========================================================
