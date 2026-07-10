@@ -348,6 +348,8 @@
 #             st.text(r[0][:500])
 #     else:
 #         st.info("No resumes saved yet.")
+import os
+
 import streamlit as st
 import tempfile
 from rag import rag
@@ -648,35 +650,28 @@ elif st.session_state.page == "AI Chat":
     # -----------------------------
     # Upload Resume
     # -----------------------------
-    uploaded_resume = st.file_uploader(
-    "📄 Upload Resume (PDF)",
+ # Resume Upload
+uploaded_resume = st.file_uploader(
+    "Upload Resume PDF",
     type=["pdf"],
-    key="resume_chat"
+    key="resume_upload"
 )
 
 if uploaded_resume is not None:
 
-    if (
-        "resume_loaded" not in st.session_state
-        or st.session_state.get("resume_name") != uploaded_resume.name
-    ):
+    st.success(f"Uploaded: {uploaded_resume.name}")
 
-        with st.spinner("Reading Resume..."):
+    # Save uploaded file
+    resume_path = os.path.join(
+        "uploads",
+        uploaded_resume.name
+    )
 
-            try:
+    with open(resume_path, "wb") as f:
+        f.write(uploaded_resume.getbuffer())
 
-                rag.add_document(uploaded_resume)
-
-                st.session_state.resume_loaded = True
-                st.session_state.resume_name = uploaded_resume.name
-
-                st.success("✅ Resume uploaded successfully!")
-
-            except Exception as e:
-
-                st.error(f"❌ {e}")
-
-    st.divider() 
+    st.session_state.resume_path = resume_path
+    st.session_state.resume_name = uploaded_resume.name
     # -----------------------------
     # Load Previous Chat
     # -----------------------------
