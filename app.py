@@ -575,10 +575,9 @@ with st.sidebar:
     )
 
     st.metric(
-        "📄 PDFs",
-        rag.count()
-    )
-
+    "📄 Resume",
+    "Uploaded" if st.session_state.get("resume_loaded", False) else "Not Uploaded"
+)
     st.metric(
         "📝 Resumes",
         stats["resumes"]
