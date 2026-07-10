@@ -486,30 +486,17 @@
 
 #     return data
 
-
-"""
-rag.py
-------------------------------------
-Multi-PDF Retrieval Augmented Generation
-"""
-
 import os
 import uuid
-
 import fitz  # PyMuPDF
-
 import chromadb
 
 from sentence_transformers import SentenceTransformer
-
-
-from chatbot import bot
-
-from prompts import RAG_PROMPT
-
-from config import VECTOR_DB
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from chatbot import bot
+from prompts import RAG_PROMPT
+from config import VECTOR_DB
 class RAG:
 
     def __init__(self):
@@ -532,62 +519,135 @@ class RAG:
             chunk_size=1000,
             chunk_overlap=200
         )
-
-    # =====================================
+            # =====================================
     # Read PDF
     # =====================================
 
-def read_pdf(self, pdf):
+    def read_pdf(self, pdf):
 
-    data = pdf.getvalue()
+        try:
 
-    if not data:
-        raise ValueError("Uploaded PDF is empty.")
+            if hasattr(pdf, "getvalue"):
 
-    document = fitz.open(
-        stream=data,
-        filetype="pdf"
-    )
+                data = pdf.getvalue()
 
-    text = ""
+                if len(data) == 0:
+                    raise ValueError("Uploaded PDF is empty.")
 
-    for page in document:
-        text += page.get_text()
+                document = fitz.open(
+                    stream=data,
+                    filetype="pdf"
+                )
 
-    document.close()
+            elif isinstance(pdf, str):
 
-    return text
-    # =====================================
-    # Chunk Text
-    # =====================================
-    # =====================================
-    # Add PDF to Vector DB
-    # =====================================
+                if not os.path.exists(pdf):
+                    raise FileNotFoundError(pdf)
+
+                if os.path.getsize(pdf) == 0:
+                    raise ValueError("PDF file is empty.")
+
+                document = fitz.open(pdf)
+
+            else:
+
+                raise ValueError("Unsupported PDF input.")
+
+            text = ""
+
+            for page in document:
+                text += page.get_text()
+
+            document.close()
+
+            return text
+
+        except Exception as e:
+
+            raise Exception(
+                f"Unable to read PDF: {e}"
+            )
+        # =====================================
+# Chunk Text
+# =====================================
+
+def chunk_text(self, text):
+
+    if not text or not text.strip():
+        return []
+
+    return self.splitter.split_text(text)
+# =====================================
+# Add PDF to Vector DB
+# =====================================
 
 def add_document(self, uploaded_file):
 
-    text = self.read_pdf(uploaded_file)
+    try:
 
-    chunks = self.chunk_text(text)
+        # Read PDF
+        text = self.read_pdf(uploaded_file)
 
-    for chunk in chunks:
+        if not text.strip():
+            raise ValueError(
+                "No readable text found in the PDF."
+            )
 
-        embedding = self.embedding_model.encode(chunk).tolist()
+        # Split into chunks
+        chunks = self.chunk_text(text)
 
-        self.collection.add(
-            ids=[str(uuid.uuid4())],
-            documents=[chunk],
-            embeddings=[embedding],
+        if len(chunks) == 0:
+            raise ValueError(
+                "No text chunks were created."
+            )
+
+        # Optional: clear previous vectors if you only
+        # want one uploaded resume at a time
+        try:
+            self.client.delete_collection("documents")
+        except Exception:
+            pass
+
+        self.collection = self.client.get_or_create_collection(
+            name="documents"
         )
 
-    self.documents.append(uploaded_file.name)
+        # Store embeddings
+        for chunk in chunks:
 
-    return True
-        # =====================================
-    # Retrieve Relevant Chunks
+            embedding = self.embedding_model.encode(
+                chunk
+            ).tolist()
+
+            self.collection.add(
+                ids=[str(uuid.uuid4())],
+                documents=[chunk],
+                embeddings=[embedding]
+            )
+
+        filename = getattr(
+            uploaded_file,
+            "name",
+            "Uploaded Resume"
+        )
+
+        if filename not in self.documents:
+            self.documents.append(filename)
+
+        return True
+
+    except Exception as e:
+
+        raise Exception(
+            f"Failed to index document: {e}"
+        )
     # =====================================
+# Retrieve Relevant Chunks
+# =====================================
 
-    def retrieve(self, question, top_k=4):
+def retrieve(self, question, top_k=4):
+
+    try:
 
         embedding = self.embedding_model.encode(
             question
@@ -598,32 +658,50 @@ def add_document(self, uploaded_file):
             n_results=top_k
         )
 
-        documents = []
+        if (
+            results
+            and "documents" in results
+            and len(results["documents"]) > 0
+        ):
 
-        if results["documents"]:
+            return results["documents"][0]
 
-            documents = results["documents"][0]
+        return []
 
-        return documents
+    except Exception as e:
 
+        print(f"Retrieve Error: {e}")
+
+        return []
     # =====================================
-    # Build Context
-    # =====================================
+# Build Context
+# =====================================
 
-    def build_context(self, question):
+def build_context(self, question):
 
-        docs = self.retrieve(question)
+    try:
 
-        if not docs:
+        documents = self.retrieve(question)
+
+        if not documents:
             return ""
 
-        return "\n\n".join(docs)
+        context = "\n\n".join(documents)
 
-    # =====================================
-    # Ask Question
-    # =====================================
+        return context
 
-    def ask(self, question):
+    except Exception as e:
+
+        print(f"Context Error: {e}")
+
+        return ""
+    # =====================================
+# Ask Question
+# =====================================
+
+def ask(self, question):
+
+    try:
 
         context = self.build_context(question)
 
@@ -637,7 +715,7 @@ def add_document(self, uploaded_file):
         else:
 
             prompt = f"""
-No document context was found.
+No relevant information was found in the uploaded resume.
 
 Answer the following question using your general knowledge.
 
@@ -649,52 +727,68 @@ Question:
 
         return answer
 
-    # =====================================
-    # Search Only
-    # =====================================
+    except Exception as e:
 
-    def search(self, query):
+        return f"Error: {e}"
+    # =====================================
+# Search Only
+# =====================================
+
+def search(self, query):
+
+    try:
 
         return self.retrieve(query)
 
-    # =====================================
-    # Count Documents
-    # =====================================
+    except Exception as e:
 
-    def count(self):
+        print(f"Search Error: {e}")
+
+        return []
+    # =====================================
+# Count Documents
+# =====================================
+
+def count(self):
+
+    try:
 
         return len(self.documents)
 
-    # =====================================
-    # Reset Vector Store
-    # =====================================
+    except Exception:
 
-    def clear(self):
-
-        try:
-
-            self.client.delete_collection("documents")
-
-        except Exception:
-            pass
-
-        self.collection = self.client.get_or_create_collection(
-            name="documents"
-        )
-
-        self.documents = []
-
-    # =====================================
-    # List Uploaded PDFs
-    # =====================================
-
-    def list_documents(self):
-
-        return self.documents
+        return 0
 
 
-# ==========================================
+# =====================================
+# Clear Vector Store
+# =====================================
+
+def clear(self):
+
+    try:
+
+        self.client.delete_collection("documents")
+
+    except Exception:
+        pass
+
+    self.collection = self.client.get_or_create_collection(
+        name="documents"
+    )
+
+    self.documents = []
+
+
+# =====================================
+# List Uploaded Documents
+# =====================================
+
+def list_documents(self):
+
+    return self.documents
+# =====================================
 # Singleton
-# ==========================================
+# =====================================
 
 rag = RAG()
