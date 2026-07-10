@@ -488,33 +488,33 @@ with st.sidebar:
     # PDF Upload (RAG)
     # ======================================
 
-    uploaded_files = st.file_uploader(
-        "📄 Upload PDF Documents",
-        type=["pdf"],
-        accept_multiple_files=True,
-        key="sidebar_pdf_upload"
-    )
+    # uploaded_files = st.file_uploader(
+    #     "📄 Upload PDF Documents",
+    #     type=["pdf"],
+    #     accept_multiple_files=True,
+    #     key="sidebar_pdf_upload"
+    # )
 
-    if uploaded_files:
+    # if uploaded_files:
 
-        with st.spinner("📚 Indexing Documents..."):
+    #     with st.spinner("📚 Indexing Documents..."):
 
-            for pdf in uploaded_files:
+    #         for pdf in uploaded_files:
 
-                with tempfile.NamedTemporaryFile(
-                    delete=False,
-                    suffix=".pdf"
-                ) as tmp:
+    #             with tempfile.NamedTemporaryFile(
+    #                 delete=False,
+    #                 suffix=".pdf"
+    #             ) as tmp:
 
-                    tmp.write(pdf.read())
+    #                 tmp.write(pdf.read())
 
-                    rag.add_document(tmp.name)
+    #                 rag.add_document(tmp.name)
 
-        st.session_state.documents_loaded = True
+    #     st.session_state.documents_loaded = True
 
-        st.success("✅ Documents Indexed Successfully")
+    #     st.success("✅ Documents Indexed Successfully")
 
-    st.divider()
+    # st.divider()
 
     # ======================================
     # NAVIGATION
@@ -643,14 +643,41 @@ if st.session_state.page == "Dashboard":
 
 elif st.session_state.page == "AI Chat":
 
-    st.title("💬 AI Chat")
+    st.title("💬 Resume AI Chat")
+    st.caption("Upload your resume and chat with AI.")
 
-    st.caption(
-        "Chat with your uploaded PDF documents using RAG."
+    # -----------------------------
+    # Upload Resume
+    # -----------------------------
+    uploaded_resume = st.file_uploader(
+        "📄 Upload Resume (PDF)",
+        type=["pdf"],
+        key="resume_chat"
     )
 
-    # Load old chats
+    if uploaded_resume is not None:
 
+        if (
+            "resume_loaded" not in st.session_state
+            or st.session_state.get("resume_name") != uploaded_resume.name
+        ):
+
+            with st.spinner("Reading Resume..."):
+
+                rag.clear()
+
+                rag.add_document(uploaded_resume)
+
+                st.session_state.resume_loaded = True
+                st.session_state.resume_name = uploaded_resume.name
+
+            st.success("✅ Resume uploaded successfully!")
+
+    st.divider()
+
+    # -----------------------------
+    # Load Previous Chat
+    # -----------------------------
     if len(st.session_state.messages) == 0:
 
         history = load_chat(st.session_state.user)
@@ -671,19 +698,18 @@ elif st.session_state.page == "AI Chat":
                 }
             )
 
+    # -----------------------------
     # Display Chat
-
+    # -----------------------------
     for msg in st.session_state.messages:
 
         with st.chat_message(msg["role"]):
-
             st.markdown(msg["content"])
 
+    # -----------------------------
     # Chat Input
-
-    prompt = st.chat_input(
-        "Ask anything..."
-    )
+    # -----------------------------
+    prompt = st.chat_input("Ask about your resume...")
 
     if prompt:
 
@@ -695,14 +721,19 @@ elif st.session_state.page == "AI Chat":
         )
 
         with st.chat_message("user"):
-
             st.markdown(prompt)
 
         with st.chat_message("assistant"):
 
             with st.spinner("Thinking..."):
 
-                answer = rag.ask(prompt)
+                if st.session_state.get("resume_loaded", False):
+
+                    answer = rag.ask(prompt)
+
+                else:
+
+                    answer = "⚠️ Please upload your resume first."
 
                 st.markdown(answer)
 
